@@ -10,8 +10,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    // ── Register ───────────────────────────────────────────────────
-
     public function showRegister()
     {
         return view('auth.register', [
@@ -22,31 +20,39 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
-            'email'        => ['required', 'email', 'unique:users'],
-            'password'     => ['required', 'string', 'min:8', 'confirmed'],
-            'role'         => ['required', 'in:' . implode(',', User::ROLES)],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'phone'        => ['nullable', 'string', 'max:20'],
-            'interests'    => ['nullable', 'string', 'max:500'],
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'email', 'unique:users'],
+            'password'      => ['required', 'string', 'min:8', 'confirmed'],
+            'role'          => ['required', 'in:' . implode(',', User::ROLES)],
+            'company_name'  => ['nullable', 'string', 'max:255'],
+            'phone_prefix'  => ['nullable', 'string', 'max:6'],
+            'phone_number'  => ['nullable', 'string', 'max:20'],
+            'interests'     => ['nullable', 'string', 'max:500'],
+            'bio'           => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $phone = null;
+        if (! empty($validated['phone_number'])) {
+            $prefix = $validated['phone_prefix'] ?? '+49';
+            $phone = trim($prefix . ' ' . $validated['phone_number']);
+        }
 
         $user = User::create([
             'name'         => $validated['name'],
             'email'        => $validated['email'],
             'password'     => Hash::make($validated['password']),
             'role'         => $validated['role'],
-            'company_name' => $validated['company_name'],
-            'phone'        => $validated['phone'],
-            'interests'    => $validated['interests'],
+            'company_name' => $validated['company_name'] ?? null,
+            'phone'        => $phone,
+            'interests'    => $validated['interests'] ?? null,
+            'bio'          => $validated['bio'] ?? null,
+            'is_active'    => true,
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('projects.index')->with('success', 'Registro exitoso. ¡Bienvenido!');
+        return redirect()->route('dashboard')->with('success', 'Registration successful. Welcome to MunichTech EXPO!');
     }
-
-    // ── Login ──────────────────────────────────────────────────────
 
     public function showLogin()
     {
@@ -60,17 +66,24 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && ! $user->is_active) {
+            return back()->withErrors([
+                'email' => 'Your account is deactivated. Please contact the administrator.',
+            ])->onlyInput('email');
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->route('projects.index')->with('success', 'Sesión iniciada correctamente.');
+
+            return redirect()->route('dashboard')->with('success', 'Signed in successfully.');
         }
 
         return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no son válidas.',
+            'email' => 'The provided credentials are invalid.',
         ])->onlyInput('email');
     }
-
-    // ── Google OAuth ───────────────────────────────────────────────
 
     public function redirectToGoogle()
     {
@@ -82,12 +95,12 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Exception $e) {
-            return redirect()->route('login')->withErrors(['error' => 'Error en la autenticación con Google.']);
+            return redirect()->route('login')->withErrors(['error' => 'Google authentication failed.']);
         }
 
         $user = User::where('google_id', $googleUser->getId())->first();
 
-        if (!$user) {
+        if (! $user) {
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if ($user) {
@@ -98,17 +111,20 @@ class AuthController extends Controller
                     'email'     => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'role'      => 'Attendee',
-                    'password'  => Hash::make(uniqid()),
+                    'password'  => Hash::make(uniqid('', true)),
+                    'is_active' => true,
                 ]);
             }
         }
 
+        if (! $user->is_active) {
+            return redirect()->route('login')->withErrors(['error' => 'Your account is deactivated.']);
+        }
+
         Auth::login($user, remember: true);
 
-        return redirect()->route('projects.index')->with('success', 'Autenticación con Google exitosa.');
+        return redirect()->route('dashboard')->with('success', 'Google sign-in successful.');
     }
-
-    // ── Logout ─────────────────────────────────────────────────────
 
     public function logout(Request $request)
     {
@@ -116,6 +132,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home')->with('success', 'Sesión cerrada correctamente.');
+        return redirect()->route('home')->with('success', 'Signed out successfully.');
     }
 }

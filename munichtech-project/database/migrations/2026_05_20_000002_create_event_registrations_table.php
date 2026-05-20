@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('ticket_category', ['free', 'startup', 'investor', 'company', 'hackathon'])->default('free');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->text('special_requirements')->nullable();
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamps();

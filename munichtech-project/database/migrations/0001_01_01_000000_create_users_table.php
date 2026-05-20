@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('company_name')->nullable();
             $table->string('phone')->nullable();
             $table->boolean('is_admin')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->string('google_id')->nullable()->unique();
+            $table->text('interests')->nullable();
             $table->text('bio')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

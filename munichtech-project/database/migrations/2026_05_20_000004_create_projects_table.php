@@ -11,9 +11,11 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('collaboration_request_id')->nullable()->constrained('collaboration_requests')->nullOnDelete();
             $table->string('title');
             $table->text('description');
             $table->enum('status', ['planning', 'active', 'paused', 'completed'])->default('planning');
+            $table->enum('admin_status', ['active', 'inactive', 'suspended'])->default('active');
             $table->integer('progress')->default(0)->unsigned();
             $table->text('tags')->nullable();
             $table->timestamps();

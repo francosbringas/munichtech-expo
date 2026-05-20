@@ -12,6 +12,7 @@ class EventRegistration extends Model
     protected $fillable = [
         'user_id',
         'ticket_category',
+        'status',
         'special_requirements',
         'confirmed_at',
     ];
@@ -22,8 +23,6 @@ class EventRegistration extends Model
             'confirmed_at' => 'datetime',
         ];
     }
-
-    // ── Relationships ──────────────────────────────────────────────
 
     public function user()
     {

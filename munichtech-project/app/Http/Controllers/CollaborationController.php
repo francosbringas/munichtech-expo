@@ -28,6 +28,8 @@ class CollaborationController extends Controller
 
     public function create(Request $request)
     {
+        $preselectedReceiverId = $request->get('receiver_id');
+
         $users = User::where('id', '!=', Auth::id())
             ->when($request->filled('search'), function ($q) use ($request) {
                 $search = $request->search;
@@ -40,7 +42,7 @@ class CollaborationController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('collaborations.create', compact('users'));
+        return view('collaborations.create', compact('users', 'preselectedReceiverId'));
     }
 
     public function store(Request $request)
@@ -51,7 +53,7 @@ class CollaborationController extends Controller
         ]);
 
         if ($validated['receiver_id'] == Auth::id()) {
-            return back()->withErrors(['receiver_id' => 'No puedes colaborar contigo mismo.']);
+            return back()->withErrors(['receiver_id' => 'You cannot collaborate with yourself.']);
         }
 
         $existing = CollaborationRequest::where('sender_id', Auth::id())
@@ -59,7 +61,7 @@ class CollaborationController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->withErrors(['receiver_id' => 'Ya has enviado una solicitud a este usuario.']);
+            return back()->withErrors(['receiver_id' => 'You have already sent a request to this user.']);
         }
 
         CollaborationRequest::create([
@@ -69,7 +71,7 @@ class CollaborationController extends Controller
         ]);
 
         return redirect()->route('collaborations.index')
-            ->with('success', 'Solicitud de colaboración enviada.');
+            ->with('success', 'Collaboration request sent.');
     }
 
     public function respond(Request $request, CollaborationRequest $collaboration)
@@ -84,10 +86,10 @@ class CollaborationController extends Controller
 
         if ($validated['action'] === 'accept') {
             $collaboration->accept();
-            return back()->with('success', 'Solicitud de colaboración aceptada.');
+            return back()->with('success', 'Collaboration request accepted.');
         } else {
             $collaboration->reject();
-            return back()->with('success', 'Solicitud de colaboración rechazada.');
+            return back()->with('success', 'Collaboration request rejected.');
         }
     }
 }

@@ -11,18 +11,6 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (! $request->user() || ! $request->user()->is_admin) {
-                abort(403, 'Acceso restringido a administradores.');
-            }
-            return $next($request);
-        });
-    }
-
-    // ── Dashboard ──────────────────────────────────────────────
-
     public function index()
     {
         $totalUsers           = User::count();
@@ -31,11 +19,11 @@ class AdminController extends Controller
         $pendingRequests      = CollaborationRequest::where('status', 'pending')->count();
         $totalEventRegs       = EventRegistration::count();
         $recentLogs           = AuditLog::with('user')->latest()->limit(15)->get();
+        $usersByRole          = User::selectRaw('role, count(*) as total')->groupBy('role')->pluck('total', 'role');
 
-        // Users by role for a quick breakdown
-        $usersByRole = User::selectRaw('role, count(*) as total')
-            ->groupBy('role')
-            ->pluck('total', 'role');
+        $users         = User::latest()->limit(20)->get();
+        $registrations = EventRegistration::with('user')->latest()->limit(20)->get();
+        $projects      = Project::with('owner')->latest()->limit(20)->get();
 
         return view('admin.dashboard', compact(
             'totalUsers',
@@ -44,220 +32,92 @@ class AdminController extends Controller
             'pendingRequests',
             'totalEventRegs',
             'recentLogs',
-            'usersByRole'
+            'usersByRole',
+            'users',
+            'registrations',
+            'projects'
         ));
     }
 
-    // ── Users ──────────────────────────────────────────────────
-
-    public function users(Request $request)
+    public function updateUserRole(Request $request, User $user)
     {
-        $query = User::query();
+        $data = $request->validate([
+            'role' => ['required', 'in:' . implode(',', User::ROLES)],
+        ]);
 
-        if ($request->filled('search')) {
-            $q = $request->search;
-            $query->where(fn($b) => $b->where('name', 'like', "%$q%")
-                ->orWhere('email', 'like', "%$q%")
-                ->orWhere('company_name', 'like', "%$q%"));
+        $user->role = $data['role'];
+        $user->save();
+
+        $this->logAction('Admin updated user role', "User #{$user->id} role → {$data['role']}");
+
+        return back()->with('success', "Role for {$user->name} has been updated.");
+    }
+
+    public function toggleUserActive(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->withErrors(['error' => 'You cannot deactivate your own account.']);
         }
 
-        if ($request->filled('role')) {
-            $query->where('role', $request->role);
-        }
+        $user->is_active = ! $user->is_active;
+        $user->save();
 
-        $users = $query->latest()->paginate(20)->withQueryString();
+        $this->logAction('Admin toggled user active status', "User #{$user->id} is_active → " . ($user->is_active ? 'true' : 'false'));
 
-        return view('admin.users', compact('users'));
+        return back()->with('success', "Account status for {$user->name} has been updated.");
     }
 
     public function toggleAdmin(User $user)
     {
-        // Prevent removing your own admin rights
         if ($user->id === auth()->id()) {
-            return back()->withErrors(['error' => 'No puedes cambiar tu propio estado de administrador.']);
+            return back()->withErrors(['error' => 'You cannot change your own administrator status.']);
         }
 
         $user->is_admin = ! $user->is_admin;
         $user->save();
 
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'action'     => 'Admin toggled user admin status',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'details'    => "User #{$user->id} ({$user->email}) is_admin → " . ($user->is_admin ? 'true' : 'false'),
-        ]);
+        $this->logAction('Admin toggled user admin status', "User #{$user->id} is_admin → " . ($user->is_admin ? 'true' : 'false'));
 
-        return back()->with('success', "Estado de administrador actualizado para {$user->name}.");
+        return back()->with('success', "Administrator status for {$user->name} has been updated.");
     }
 
-    public function destroyUser(User $user)
-    {
-        if ($user->id === auth()->id()) {
-            return back()->withErrors(['error' => 'No puedes eliminar tu propia cuenta.']);
-        }
-
-        $email = $user->email;
-        $user->delete();
-
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'action'     => 'Admin deleted user',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'details'    => "Deleted user: $email",
-        ]);
-
-        return back()->with('success', "Usuario $email eliminado.");
-    }
-
-    // ── Event Registrations ────────────────────────────────────
-
-    public function eventRegistrations(Request $request)
-    {
-        $query = EventRegistration::with('user');
-
-        if ($request->filled('search')) {
-            $q = $request->search;
-            $query->whereHas('user', fn($b) => $b->where('name', 'like', "%$q%")
-                ->orWhere('email', 'like', "%$q%"));
-        }
-
-        if ($request->filled('ticket_category')) {
-            $query->where('ticket_category', $request->ticket_category);
-        }
-
-        $registrations = $query->latest()->paginate(20)->withQueryString();
-
-        $categories = EventRegistration::distinct()->pluck('ticket_category');
-
-        return view('admin.event-registrations', compact('registrations', 'categories'));
-    }
-
-    public function destroyEventRegistration(EventRegistration $registration)
-    {
-        $registration->delete();
-
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'action'     => 'Admin deleted event registration',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'details'    => "Registration ID: {$registration->id}",
-        ]);
-
-        return back()->with('success', 'Registro de evento eliminado.');
-    }
-
-    // ── Collaboration Requests ─────────────────────────────────
-
-    public function collaborations(Request $request)
-    {
-        $query = CollaborationRequest::with(['sender', 'receiver']);
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('search')) {
-            $q = $request->search;
-            $query->whereHas('sender', fn($b) => $b->where('name', 'like', "%$q%"))
-                ->orWhereHas('receiver', fn($b) => $b->where('name', 'like', "%$q%"));
-        }
-
-        $collaborations = $query->latest()->paginate(20)->withQueryString();
-
-        return view('admin.collaborations', compact('collaborations'));
-    }
-
-    public function destroyCollaboration(CollaborationRequest $collaboration)
-    {
-        $collaboration->delete();
-
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'action'     => 'Admin deleted collaboration request',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'details'    => "Collaboration ID: {$collaboration->id}",
-        ]);
-
-        return back()->with('success', 'Solicitud de colaboración eliminada.');
-    }
-
-    // ── Projects ───────────────────────────────────────────────
-
-    public function projects(Request $request)
-    {
-        $query = Project::with('owner');
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('search')) {
-            $q = $request->search;
-            $query->where('title', 'like', "%$q%")
-                ->orWhere('description', 'like', "%$q%");
-        }
-
-        $projects = $query->latest()->paginate(20)->withQueryString();
-
-        return view('admin.projects', compact('projects'));
-    }
-
-    public function updateProjectStatus(Request $request, Project $project)
+    public function updateEventRegistrationStatus(Request $request, EventRegistration $registration)
     {
         $data = $request->validate([
-            'status' => ['required', 'in:planning,active,paused,completed'],
+            'status' => ['required', 'in:pending,confirmed,cancelled'],
         ]);
 
-        $project->status = $data['status'];
+        $registration->status = $data['status'];
+        $registration->confirmed_at = $data['status'] === 'confirmed' ? now() : null;
+        $registration->save();
+
+        $this->logAction('Admin updated event registration status', "Registration #{$registration->id} → {$data['status']}");
+
+        return back()->with('success', 'Registration status has been updated.');
+    }
+
+    public function updateProjectAdminStatus(Request $request, Project $project)
+    {
+        $data = $request->validate([
+            'admin_status' => ['required', 'in:active,inactive,suspended'],
+        ]);
+
+        $project->admin_status = $data['admin_status'];
         $project->save();
 
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'action'     => 'Admin updated project status',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'details'    => "Project #{$project->id} → {$data['status']}",
-        ]);
+        $this->logAction('Admin updated project admin status', "Project #{$project->id} admin_status → {$data['admin_status']}");
 
-        return back()->with('success', "Estado del proyecto \"{$project->title}\" actualizado.");
+        return back()->with('success', "Administrative status for \"{$project->title}\" has been updated.");
     }
 
-    public function destroyProject(Project $project)
+    private function logAction(string $action, string $details): void
     {
-        $title = $project->title;
-        $project->delete();
-
         AuditLog::create([
             'user_id'    => auth()->id(),
-            'action'     => 'Admin deleted project',
+            'action'     => $action,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'details'    => "Deleted project: $title",
+            'details'    => $details,
         ]);
-
-        return back()->with('success', "Proyecto \"$title\" eliminado.");
-    }
-
-    // ── Audit Logs ─────────────────────────────────────────────
-
-    public function auditLogs(Request $request)
-    {
-        $query = AuditLog::with('user');
-
-        if ($request->filled('action')) {
-            $query->where('action', 'like', "%{$request->action}%");
-        }
-
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        $logs = $query->latest()->paginate(30)->withQueryString();
-
-        return view('admin.audit-logs', compact('logs'));
     }
 }

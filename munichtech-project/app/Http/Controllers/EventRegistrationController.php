@@ -4,21 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades
-Auth;
+use Illuminate\Support\Facades\Auth;
 
 class EventRegistrationController extends Controller
 {
     public function index()
     {
-        $registrations = Auth::user()->eventRegistrations()->paginate(10);
+        $registrations = Auth::user()->eventRegistrations()->latest()->paginate(10);
 
         return view('events.index', compact('registrations'));
     }
 
     public function create()
     {
-        $categories = ['free' => 'Entrada Gratuita', 'startup' => 'Startup', 'investor' => 'Inversionista', 'company' => 'Empresa', 'hackathon' => 'Hackathon'];
+        $categories = [
+            'free'      => 'Free Entry',
+            'startup'   => 'Startup Pass',
+            'investor'  => 'Investor Pass',
+            'company'   => 'Company Pass',
+            'hackathon' => 'Hackathon Pass',
+        ];
 
         return view('events.register', compact('categories'));
     }
@@ -35,16 +40,16 @@ class EventRegistrationController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->withErrors(['ticket_category' => 'Ya te has registrado para esta categoría.']);
+            return back()->withErrors(['ticket_category' => 'You are already registered for this category.']);
         }
 
         EventRegistration::create([
-            'user_id'                => Auth::id(),
-            'ticket_category'        => $validated['ticket_category'],
-            'special_requirements'   => $validated['special_requirements'],
-            'confirmed_at'           => now(),
+            'user_id'              => Auth::id(),
+            'ticket_category'      => $validated['ticket_category'],
+            'special_requirements' => $validated['special_requirements'] ?? null,
+            'status'               => 'pending',
         ]);
 
-        return redirect()->route('events.index')->with('success', 'Registro de evento completado.');
+        return redirect()->route('events.index')->with('success', 'Registration request submitted. Pending confirmation.');
     }
 }
