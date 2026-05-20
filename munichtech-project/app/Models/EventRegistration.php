@@ -11,23 +11,22 @@ class EventRegistration extends Model
 
     protected $fillable = [
         'user_id',
-        'category_id',
-        'ticket_type',
-        'status',
-        'registered_at',
+        'ticket_category',
+        'special_requirements',
+        'confirmed_at',
     ];
 
-    protected $casts = [
-        'registered_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'confirmed_at' => 'datetime',
+        ];
+    }
+
+    // ── Relationships ──────────────────────────────────────────────
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(EventTicketCategory::class, 'category_id');
     }
 }

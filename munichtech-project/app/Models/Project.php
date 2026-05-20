@@ -9,37 +9,71 @@ class Project extends Model
 {
     use HasFactory;
 
-    public const STATUS_PLANNING = 'planning';
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_PAUSED = 'paused';
-    public const STATUS_COMPLETED = 'completed';
-
     protected $fillable = [
         'owner_id',
-        'collaboration_request_id',
         'title',
         'description',
-        'progress',
         'status',
-        'company_name',
+        'progress',
+        'tags',
     ];
 
-    protected $casts = [
-        'progress' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'progress' => 'integer',
+        ];
+    }
+
+    // ── Relationships ──────────────────────────────────────────────
 
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function collaborationRequest()
+    // Relación directa con los usuarios colaboradores a través de la tabla intermedia
+    public function members()
     {
-        return $this->belongsTo(CollaborationRequest::class);
+        return $this->belongsToMany(User::class, 'project_members')
+                    ->withPivot('role')
+                    ->withTimestamps();
     }
 
     public function milestones()
     {
         return $this->hasMany(ProjectMilestone::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(ProjectTask::class);
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────
+
+    public function getTags(): array
+    {
+        return array_filter(array_map('trim', explode(',', $this->tags ?? '')));
+    }
+
+    public function hasUser(User $user): bool
+    {
+        return $this->owner_id === $user->id || $this->members()->where('user_id', $user->id)->exists();
+    }
+
+    public function getMemberRole(User $user): ?string
+    {
+        if ($this->owner_id === $user->id) {
+            return 'owner';
+        }
+
+        return $this->members()->where('user_id', $user->id)->first()?->pivot?->role;
+    }
+
+    public function canEdit(User $user): bool
+    {
+        $role = $this->getMemberRole($user);
+        return in_array($role, ['owner', 'lead']);
     }
 }

@@ -2,88 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuditLog;
-use App\Models\CollaborationRequest;
 use App\Models\Project;
-use App\Models\ProjectMilestone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
-
-    public function index()
+    public function index(Request $request)
     {
-        $projects = Project::with('milestones.tasks')->where('owner_id', Auth::id())->latest()->get();
+        $query = Project::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('title', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $projects = $query->with('owner')
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
 
         return view('projects.index', compact('projects'));
     }
 
-    public function create(Request $request)
+    public function create()
     {
-        $collaboration = null;
-
-        if ($request->filled('collaboration_request_id')) {
-            $collaboration = CollaborationRequest::where('id', $request->query('collaboration_request_id'))
-                ->where('status', CollaborationRequest::STATUS_ACCEPTED)
-                ->where(function ($query) {
-                    $query->where('sender_id', Auth::id())->orWhere('receiver_id', Auth::id());
-                })
-                ->firstOrFail();
-        }
-
-        return view('projects.create', compact('collaboration'));
+        return view('projects.create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'collaboration_request_id' => ['nullable', 'exists:collaboration_requests,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string', 'min:20'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'progress' => ['required', 'integer', 'between:0,100'],
-            'status' => ['required', 'in:planning,active,paused,completed'],
-            'milestone_title' => ['nullable', 'string', 'max:255'],
-            'milestone_description' => ['nullable', 'string', 'max:1000'],
-            'milestone_due_date' => ['nullable', 'date'],
+        $validated = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'min:10'],
+            'status'      => ['required', 'in:planning,active,paused,completed'],
+            'tags'        => ['nullable', 'string', 'max:500'],
         ]);
 
         $project = Project::create([
-            'owner_id' => Auth::id(),
-            'collaboration_request_id' => $data['collaboration_request_id'] ?? null,
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'company_name' => $data['company_name'] ?? null,
-            'progress' => $data['progress'],
-            'status' => $data['status'],
+            'owner_id'   => Auth::id(),
+            'title'      => $validated['title'],
+            'description' => $validated['description'],
+            'status'     => $validated['status'],
+            'tags'       => $validated['tags'],
         ]);
 
-        if (! empty($data['milestone_title'])) {
-            ProjectMilestone::create([
-                'project_id' => $project->id,
-                'title' => $data['milestone_title'],
-                'description' => $data['milestone_description'] ?? null,
-                'due_date' => $data['milestone_due_date'] ?? null,
-            ]);
-        }
-
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'Project created',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'details' => 'Project ID: ' . $project->id,
-        ]);
-
-        return redirect()->route('projects.index')->with('success', 'Proyecto creado con éxito.');
+        return redirect()->route('projects.show', $project)
+            ->with('success', 'Proyecto creado exitosamente.');
     }
 
     public function show(Project $project)
     {
-        abort_unless($project->owner_id === Auth::id(), 403);
+        if (!$project->hasUser(Auth::user())) {
+            abort(403, 'No tienes acceso a este proyecto.');
+        }
 
-        $project->load('milestones.tasks');
+        $project->load(['owner', 'members.user', 'milestones', 'tasks.assignee']);
 
         return view('projects.show', compact('project'));
     }

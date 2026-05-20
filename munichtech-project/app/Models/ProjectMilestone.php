@@ -13,14 +13,18 @@ class ProjectMilestone extends Model
         'project_id',
         'title',
         'description',
-        'due_date',
-        'completed',
+        'target_date',
+        'status',
     ];
 
-    protected $casts = [
-        'due_date' => 'date',
-        'completed' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'target_date' => 'date',
+        ];
+    }
+
+    // ── Relationships ──────────────────────────────────────────────
 
     public function project()
     {

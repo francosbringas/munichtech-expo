@@ -10,44 +10,33 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->validate([
-            'query' => ['nullable', 'string', 'max:255'],
-            'role' => ['nullable', 'string', 'in:' . implode(',', User::ROLES)],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'project_status' => ['nullable', 'string', 'in:planning,active,paused,completed'],
-        ]);
+        $query = $request->get('q', '');
+        $type = $request->get('type', 'all');
 
-        $users = User::query();
-        $projects = Project::query();
+        $users = [];
+        $projects = [];
 
-        if (! empty($filters['query'])) {
-            $users->where(function ($query) use ($filters) {
-                $query->where('name', 'like', '%' . $filters['query'] . '%')
-                    ->orWhere('email', 'like', '%' . $filters['query'] . '%');
-            });
-
-            $projects->where(function ($query) use ($filters) {
-                $query->where('title', 'like', '%' . $filters['query'] . '%')
-                    ->orWhere('description', 'like', '%' . $filters['query'] . '%');
-            });
+        if ($type === 'all' || $type === 'users') {
+            $users = User::where('name', 'like', "%{$query}%")
+                ->orWhere('company_name', 'like', "%{$query}%")
+                ->when($request->filled('role'), function ($q) {
+                    $q->where('role', request('role'));
+                })
+                ->limit(20)
+                ->get();
         }
 
-        if (! empty($filters['role'])) {
-            $users->where('role', $filters['role']);
+        if ($type === 'all' || $type === 'projects') {
+            $projects = Project::where('title', 'like', "%{$query}%")
+                ->orWhere('description', 'like', "%{$query}%")
+                ->when($request->filled('status'), function ($q) {
+                    $q->where('status', request('status'));
+                })
+                ->with('owner')
+                ->limit(20)
+                ->get();
         }
 
-        if (! empty($filters['company_name'])) {
-            $users->where('company_name', 'like', '%' . $filters['company_name'] . '%');
-            $projects->where('company_name', 'like', '%' . $filters['company_name'] . '%');
-        }
-
-        if (! empty($filters['project_status'])) {
-            $projects->where('status', $filters['project_status']);
-        }
-
-        $users = $users->orderBy('name')->limit(50)->get();
-        $projects = $projects->with('owner')->orderBy('updated_at', 'desc')->limit(50)->get();
-
-        return view('search.results', compact('users', 'projects', 'filters'));
+        return view('search.results', compact('users', 'projects', 'query', 'type'));
     }
 }

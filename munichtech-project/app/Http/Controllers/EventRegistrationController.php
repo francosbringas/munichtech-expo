@@ -2,55 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuditLog;
 use App\Models\EventRegistration;
-use App\Models\EventTicketCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades
+Auth;
 
 class EventRegistrationController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
-        $registrations = Auth::user()->eventRegistrations()->with('category')->latest()->get();
+        $registrations = Auth::user()->eventRegistrations()->paginate(10);
 
         return view('events.index', compact('registrations'));
     }
 
     public function create()
     {
-        $categories = EventTicketCategory::orderBy('price')->get();
+        $categories = ['free' => 'Entrada Gratuita', 'startup' => 'Startup', 'investor' => 'Inversionista', 'company' => 'Empresa', 'hackathon' => 'Hackathon'];
 
         return view('events.register', compact('categories'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'category_id' => ['required', 'exists:event_ticket_categories,id'],
-            'ticket_type' => ['required', 'string', 'max:100'],
+        $validated = $request->validate([
+            'ticket_category'      => ['required', 'in:free,startup,investor,company,hackathon'],
+            'special_requirements' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $registration = EventRegistration::create([
-            'user_id' => Auth::id(),
-            'category_id' => $data['category_id'],
-            'ticket_type' => $data['ticket_type'],
-            'status' => 'confirmed',
+        $existing = Auth::user()->eventRegistrations()
+            ->where('ticket_category', $validated['ticket_category'])
+            ->first();
+
+        if ($existing) {
+            return back()->withErrors(['ticket_category' => 'Ya te has registrado para esta categoría.']);
+        }
+
+        EventRegistration::create([
+            'user_id'                => Auth::id(),
+            'ticket_category'        => $validated['ticket_category'],
+            'special_requirements'   => $validated['special_requirements'],
+            'confirmed_at'           => now(),
         ]);
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'Event registration created',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'details' => 'Registration ID: ' . $registration->id,
-        ]);
-
-        return redirect()->route('events.index')->with('success', 'Registro para MunichTech EXPO completado.');
+        return redirect()->route('events.index')->with('success', 'Registro de evento completado.');
     }
 }

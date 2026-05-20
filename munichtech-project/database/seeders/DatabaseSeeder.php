@@ -7,6 +7,7 @@ use App\Models\CollaborationRequest;
 use App\Models\EventRegistration;
 use App\Models\EventTicketCategory;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\ProjectMilestone;
 use App\Models\ProjectTask;
 use App\Models\User;
@@ -91,19 +92,20 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Password123!'),
         ]);
 
+        // Adaptado a las categorías de tickets de la nueva migración
         EventTicketCategory::create(['name' => 'Standard', 'description' => 'Acceso general a MunichTech EXPO.', 'price' => 49.00]);
         EventTicketCategory::create(['name' => 'VIP', 'description' => 'Acceso prioritario, networking VIP y kit de bienvenida.', 'price' => 129.00]);
         EventTicketCategory::create(['name' => 'Startup Pass', 'description' => 'Acceso para startups con pitch y mentoría.', 'price' => 79.00]);
         EventTicketCategory::create(['name' => 'Investor Pass', 'description' => 'Acceso especial para inversores y mesas privadas.', 'price' => 99.00]);
 
-        EventRegistration::create([ 'user_id' => $startup->id, 'category_id' => 3, 'ticket_type' => 'Startup Pass', 'status' => 'confirmed' ]);
-        EventRegistration::create([ 'user_id' => $investor->id, 'category_id' => 4, 'ticket_type' => 'Investor Pass', 'status' => 'confirmed' ]);
-        EventRegistration::create([ 'user_id' => $attendee->id, 'category_id' => 1, 'ticket_type' => 'Standard', 'status' => 'confirmed' ]);
+        EventRegistration::create([ 'user_id' => $startup->id, 'ticket_category' => 'startup', 'status' => 'confirmed', 'confirmed_at' => now() ]);
+        EventRegistration::create([ 'user_id' => $investor->id, 'ticket_category' => 'investor', 'status' => 'confirmed', 'confirmed_at' => now() ]);
+        EventRegistration::create([ 'user_id' => $attendee->id, 'ticket_category' => 'free', 'status' => 'confirmed', 'confirmed_at' => now() ]);
 
-        $collaboration = CollaborationRequest::create([
+        CollaborationRequest::create([
             'sender_id' => $startup->id,
             'receiver_id' => $serviceProvider->id,
-            'message' => 'Busco un socio experto en ciberseguridad para integrar un MVP IoT con protección de datos y detección de intrusiones.',
+            'message' => 'Busco un socio experto en ciberseguridad para integrar un MVP IoT con protección de datos.',
             'status' => 'accepted',
             'responded_at' => now(),
         ]);
@@ -111,32 +113,60 @@ class DatabaseSeeder extends Seeder
         CollaborationRequest::create([
             'sender_id' => $hackParticipant->id,
             'receiver_id' => $company->id,
-            'message' => 'Me gustaría colaborar en un prototipo de plataforma de eventos conectados para gestionar asistentes y métricas en tiempo real.',
+            'message' => 'Me gustaría colaborar en un prototipo de plataforma de eventos conectados.',
             'status' => 'pending',
         ]);
 
+        // Ajustado a las columnas estrictas de la nueva migración de proyectos
         $project = Project::create([
             'owner_id' => $startup->id,
-            'collaboration_request_id' => $collaboration->id,
             'title' => 'Plataforma de Seguridad IoT para Expo',
             'description' => 'Desarrollo de una plataforma colaborativa para monitorear dispositivos IoT, evaluar amenazas y gestionar proyectos en tiempo real.',
             'progress' => 42,
             'status' => 'active',
-            'company_name' => 'InnovaBiz',
+            'tags' => 'IoT, Security, Cloud',
         ]);
 
+        // Asignamos al proveedor de servicios como miembro del proyecto
+        ProjectMember::create([
+            'project_id' => $project->id,
+            'user_id' => $serviceProvider->id,
+            'role' => 'contributor',
+        ]);
+
+        // Ajustado a: target_date y status (enum)
         $milestone1 = ProjectMilestone::create([
             'project_id' => $project->id,
             'title' => 'Definir arquitectura de seguridad',
             'description' => 'Revisión de requisitos, diseño de capas de defensa y plan de validación para el sistema IoT.',
-            'due_date' => now()->addWeeks(2)->toDateString(),
-            'completed' => false,
+            'target_date' => now()->addWeeks(2)->toDateString(),
+            'status' => 'in_progress',
         ]);
 
-        ProjectTask::create([ 'milestone_id' => $milestone1->id, 'title' => 'Mapear activos IoT', 'description' => 'Crear inventario de dispositivos y vectores de acceso.', 'assigned_to_id' => $serviceProvider->id, 'due_date' => now()->addWeek()->toDateString(), 'completed' => false ]);
-        ProjectTask::create([ 'milestone_id' => $milestone1->id, 'title' => 'Evaluar riesgos de red', 'description' => 'Realizar análisis de puertos y servicios expuestos.', 'assigned_to_id' => $serviceProvider->id, 'due_date' => now()->addWeeks(2)->toDateString(), 'completed' => false ]);
+        // Ajustado a: assigned_to y status/priority (enums)
+        ProjectTask::create([
+            'project_id' => $project->id,
+            'milestone_id' => $milestone1->id,
+            'title' => 'Mapear activos IoT',
+            'description' => 'Crear inventario de dispositivos y vectores de acceso.',
+            'assigned_to' => $serviceProvider->id,
+            'due_date' => now()->addWeek()->toDateString(),
+            'status' => 'in_progress',
+            'priority' => 'high'
+        ]);
 
-        AuditLog::create([ 'user_id' => $admin->id, 'action' => 'Seeder executed', 'ip_address' => '127.0.0.1', 'user_agent' => 'Seeder script', 'details' => 'Initial data population including users, tickets, collaborations and projects.' ]);
+        ProjectTask::create([
+            'project_id' => $project->id,
+            'milestone_id' => $milestone1->id,
+            'title' => 'Evaluar riesgos de red',
+            'description' => 'Realizar análisis de puertos y servicios expuestos.',
+            'assigned_to' => $serviceProvider->id,
+            'due_date' => now()->addWeeks(2)->toDateString(),
+            'status' => 'todo',
+            'priority' => 'medium'
+        ]);
+
+        AuditLog::create([ 'user_id' => $admin->id, 'action' => 'Seeder executed', 'ip_address' => '127.0.0.1', 'user_agent' => 'Seeder script', 'details' => 'Initial data population.' ]);
         AuditLog::create([ 'user_id' => $startup->id, 'action' => 'Created project', 'ip_address' => '127.0.0.1', 'user_agent' => 'Seeder script', 'details' => 'Project ID: ' . $project->id ]);
     }
 }

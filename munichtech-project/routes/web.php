@@ -51,8 +51,6 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('projects.index');
     })->name('dashboard');
 
-    Route::get('admin', [AdminController::class, 'index'])->name('admin.dashboard');
-
     //events
     Route::get('events',          [EventRegistrationController::class, 'index'])->name('events.index');
     Route::get('events/register', [EventRegistrationController::class, 'create'])->name('events.create');
@@ -72,4 +70,33 @@ Route::middleware('auth')->group(function () {
 
     //search
     Route::get('search', [SearchController::class, 'index'])->name('search.index');
+
+    // ─────────────────────────────────────────────
+    //  Admin Routes (Protected by AdminMiddleware in controller)
+    // ─────────────────────────────────────────────
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+
+        // Users Management
+        Route::get('users', [AdminController::class, 'users'])->name('users');
+        Route::post('users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle-admin');
+        Route::delete('users/{user}', [AdminController::class, 'destroyUser'])->name('destroy-user');
+
+        // Event Registrations
+        Route::get('event-registrations', [AdminController::class, 'eventRegistrations'])->name('event-registrations');
+        Route::delete('event-registrations/{registration}', [AdminController::class, 'destroyEventRegistration'])->name('destroy-event-registration');
+
+        // Collaborations
+        Route::get('collaborations', [AdminController::class, 'collaborations'])->name('collaborations');
+        Route::delete('collaborations/{collaboration}', [AdminController::class, 'destroyCollaboration'])->name('destroy-collaboration');
+
+        // Projects
+        Route::get('projects', [AdminController::class, 'projects'])->name('projects');
+        Route::patch('projects/{project}/status', [AdminController::class, 'updateProjectStatus'])->name('update-project-status');
+        Route::delete('projects/{project}', [AdminController::class, 'destroyProject'])->name('destroy-project');
+
+        // Audit Logs
+        Route::get('audit-logs', [AdminController::class, 'auditLogs'])->name('audit-logs');
+    });
 });

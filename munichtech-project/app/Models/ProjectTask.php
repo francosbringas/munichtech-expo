@@ -10,26 +10,37 @@ class ProjectTask extends Model
     use HasFactory;
 
     protected $fillable = [
+        'project_id',
         'milestone_id',
+        'assigned_to',
         'title',
         'description',
-        'assigned_to_id',
+        'status',
+        'priority',
         'due_date',
-        'completed',
     ];
 
-    protected $casts = [
-        'due_date' => 'date',
-        'completed' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'due_date' => 'date',
+        ];
+    }
+
+    // ── Relationships ──────────────────────────────────────────────
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 
     public function milestone()
     {
         return $this->belongsTo(ProjectMilestone::class, 'milestone_id');
     }
 
-    public function assignedTo()
+    public function assignee()
     {
-        return $this->belongsTo(User::class, 'assigned_to_id');
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 }

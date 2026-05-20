@@ -9,10 +9,6 @@ class CollaborationRequest extends Model
 {
     use HasFactory;
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_ACCEPTED = 'accepted';
-    public const STATUS_REJECTED = 'rejected';
-
     protected $fillable = [
         'sender_id',
         'receiver_id',
@@ -21,9 +17,14 @@ class CollaborationRequest extends Model
         'responded_at',
     ];
 
-    protected $casts = [
-        'responded_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'responded_at' => 'datetime',
+        ];
+    }
+
+    // ── Relationships ──────────────────────────────────────────────
 
     public function sender()
     {
@@ -35,8 +36,31 @@ class CollaborationRequest extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
-    public function project()
+    // ── Helpers ────────────────────────────────────────────────────
+
+    public function isPending(): bool
     {
-        return $this->hasOne(Project::class);
+        return $this->status === 'pending';
+    }
+
+    public function isAccepted(): bool
+    {
+        return $this->status === 'accepted';
+    }
+
+    public function accept()
+    {
+        $this->update([
+            'status' => 'accepted',
+            'responded_at' => now(),
+        ]);
+    }
+
+    public function reject()
+    {
+        $this->update([
+            'status' => 'rejected',
+            'responded_at' => now(),
+        ]);
     }
 }
