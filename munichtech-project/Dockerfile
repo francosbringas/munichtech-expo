@@ -31,4 +31,4 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN mkdir -p database && touch database/database.sqlite && chmod -R 777 database storage
 
 # Comando de arranque: ejecuta migraciones, semillas y enciende el servidor en el puerto de Render
-CMD php artisan migrate:fresh --seed --force && php artisan serve --host 0.0.0.0 --port $PORT
+CMD sh -c "php artisan migrate:fresh --seed --force && php artisan serve --host 0.0.0.0 --port $PORT"
