@@ -4,11 +4,11 @@
 <div class="row mb-4">
     <div class="col-lg-12">
         <div class="card shadow-sm">
-            <div class="card-header">Buscador</div>
+            <div class="card-header">Search</div>
             <div class="card-body">
                 <form method="GET" action="{{ route('search.index') }}" class="row gy-3">
                     <div class="col-md-4">
-                        <input type="text" name="query" value="{{ $filters['query'] ?? '' }}" class="form-control" placeholder="Buscar por nombre, email o título de proyecto">
+                        <input type="text" name="query" value="{{ $filters['query'] ?? '' }}" class="form-control" placeholder="Search by name, email or project title">
                     </div>
                     <div class="col-md-3">
                         <select name="role" class="form-select">
@@ -19,19 +19,19 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="text" name="company_name" value="{{ $filters['company_name'] ?? '' }}" class="form-control" placeholder="Empresa">
+                        <input type="text" name="company_name" value="{{ $filters['company_name'] ?? '' }}" class="form-control" placeholder="Company">
                     </div>
                     <div class="col-md-2">
                         <select name="project_status" class="form-select">
-                            <option value="">Estado</option>
-                            <option value="planning" @selected(($filters['project_status'] ?? '') === 'planning')>Planificación</option>
-                            <option value="active" @selected(($filters['project_status'] ?? '') === 'active')>Activa</option>
-                            <option value="paused" @selected(($filters['project_status'] ?? '') === 'paused')>Pausada</option>
-                            <option value="completed" @selected(($filters['project_status'] ?? '') === 'completed')>Completada</option>
+                            <option value="">Status</option>
+                            <option value="planning" @selected(($filters['project_status'] ?? '') === 'planning')>Planning</option>
+                            <option value="active" @selected(($filters['project_status'] ?? '') === 'active')>Active</option>
+                            <option value="paused" @selected(($filters['project_status'] ?? '') === 'paused')>Paused</option>
+                            <option value="completed" @selected(($filters['project_status'] ?? '') === 'completed')>Completed</option>
                         </select>
                     </div>
                     <div class="col-md-12 text-end">
-                        <button class="btn btn-primary">Buscar</button>
+                        <button class="btn btn-primary">Search</button>
                     </div>
                 </form>
             </div>
@@ -41,7 +41,7 @@
 <div class="row gy-4">
     <div class="col-lg-6">
         <div class="card shadow-sm">
-            <div class="card-header">Usuarios</div>
+            <div class="card-header">Users</div>
             <div class="card-body">
                 @forelse($users as $user)
                     <div class="mb-3 border-bottom pb-3">
@@ -50,23 +50,23 @@
                         <p class="small text-muted">{{ $user->email }}</p>
                     </div>
                 @empty
-                    <p class="text-muted">No se encontraron usuarios.</p>
+                    <p class="text-muted">No users found.</p>
                 @endforelse
             </div>
         </div>
     </div>
     <div class="col-lg-6">
         <div class="card shadow-sm">
-            <div class="card-header">Proyectos</div>
+            <div class="card-header">Projects</div>
             <div class="card-body">
                 @forelse($projects as $project)
                     <div class="mb-3 border-bottom pb-3">
                         <h5>{{ $project->title }}</h5>
                         <p class="mb-1">{{ Str::limit($project->description, 120) }}</p>
-                        <p class="small text-muted">Dueño: {{ $project->owner->name }} | Estado: {{ ucfirst($project->status) }}</p>
+                        <p class="small text-muted">Owner: {{ $project->owner->name }} | Status: {{ ucfirst($project->status) }}</p>
                     </div>
                 @empty
-                    <p class="text-muted">No se encontraron proyectos.</p>
+                    <p class="text-muted">No projects found.</p>
                 @endforelse
             </div>
         </div>

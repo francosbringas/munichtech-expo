@@ -21,22 +21,22 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 @auth
-                    <li class="nav-item"><a class="nav-link" href="{{ route('projects.index') }}">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('collaborations.index') }}">Colaboraciones</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('projects.index') }}">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('collaborations.index') }}">Collaborations</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('events.index') }}">Expo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('search.index') }}">Buscar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('search.index') }}">Search</a></li>
                     @if(auth()->user()->is_admin)
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Admin</a></li>
                     @endif
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-light ms-2">Cerrar sesión</button>
+                            <button type="submit" class="btn btn-sm btn-outline-light ms-2">Logout</button>
                         </form>
                     </li>
                 @else
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Iniciar sesión</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Registrarse</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
                 @endauth
             </ul>
         </div>

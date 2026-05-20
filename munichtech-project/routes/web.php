@@ -8,7 +8,11 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
+if (app()->environment('production')) {
+    URL::forceScheme('https');
+}
 Route::get('/', function () {
     return view('welcome');
 })->name('home');

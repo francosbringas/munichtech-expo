@@ -5,7 +5,7 @@
     <div class="col-lg-4">
         <div class="card shadow-sm border-start border-4 border-primary">
             <div class="card-body">
-                <h5>Total usuarios</h5>
+                <h5>Total users</h5>
                 <p class="display-6 mb-0">{{ $totalUsers }}</p>
             </div>
         </div>
@@ -13,7 +13,7 @@
     <div class="col-lg-4">
         <div class="card shadow-sm border-start border-4 border-success">
             <div class="card-body">
-                <h5>Proyectos</h5>
+                <h5>Projects</h5>
                 <p class="display-6 mb-0">{{ $totalProjects }}</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
     <div class="col-lg-4">
         <div class="card shadow-sm border-start border-4 border-warning">
             <div class="card-body">
-                <h5>Colaboraciones activas</h5>
+                <h5>Active Collaborations</h5>
                 <p class="display-6 mb-0">{{ $activeCollaborations }}</p>
             </div>
         </div>
@@ -32,15 +32,15 @@
         <div class="card shadow-sm">
             <div class="card-header">System Health / Audit Logs</div>
             <div class="card-body">
-                <p class="text-muted">Monitoreo básico de eventos de seguridad, accesos e integridad del sistema.</p>
+                <p class="text-muted">Basic monitoring of security events, accesses and system integrity.</p>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Usuario</th>
-                                <th>Acción</th>
+                                <th>User</th>
+                                <th>Action</th>
                                 <th>IP</th>
-                                <th>Fecha</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,12 +60,12 @@
     </div>
     <div class="col-lg-4">
         <div class="card shadow-sm">
-            <div class="card-header">Estado del entorno</div>
+            <div class="card-header">Environment Status</div>
             <div class="card-body">
-                <p class="mb-2">Base de datos: SQLite</p>
+                <p class="mb-2">Database: SQLite</p>
                 <p class="mb-2">Framework: Laravel 11</p>
-                <p class="mb-2">Seguridad: CSRF activo y validación de entrada</p>
-                <p class="mb-2">Protección: consultas Eloquent seguras</p>
+                <p class="mb-2">Security: CSRF active and input validation</p>
+                <p class="mb-2">Protection: Secure Eloquent queries</p>
             </div>
         </div>
     </div>
