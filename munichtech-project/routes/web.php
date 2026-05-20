@@ -49,6 +49,11 @@ Route::middleware('auth')->group(function () {
     Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::post('projects/{project}/milestones', [ProjectController::class, 'storeMilestone'])->name('projects.milestones.store');
     Route::post('projects/{project}/tasks', [ProjectController::class, 'storeTask'])->name('projects.tasks.store');
+    Route::patch('milestones/{milestone}/status', [ProjectController::class, 'updateMilestoneStatus'])->name('milestones.updateStatus');
+    Route::patch('tasks/{task}/status', [ProjectController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
+
+    Route::patch('milestones/{milestone}/status', [ProjectController::class, 'updateMilestoneStatus'])->name('milestones.updateStatus');
+    Route::patch('tasks/{task}/status', [ProjectController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
 
     Route::get('search', [SearchController::class, 'index'])->name('search.index');
 

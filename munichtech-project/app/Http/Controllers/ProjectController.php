@@ -125,6 +125,12 @@ class ProjectController extends Controller
 
         $project->load(['owner', 'members', 'milestones.tasks.assignee']);
 
+        $standaloneTasks = $project->tasks()
+            ->whereNull('milestone_id')
+            ->with('assignee')
+            ->orderBy('created_at')
+            ->get();
+
         $canManage = $project->hasUser(Auth::user());
 
         $assignableUsers = collect([$project->owner])
@@ -132,14 +138,12 @@ class ProjectController extends Controller
             ->unique('id')
             ->values();
 
-        return view('projects.show', compact('project', 'canManage', 'assignableUsers'));
+        return view('projects.show', compact('project', 'canManage', 'assignableUsers', 'standaloneTasks'));
     }
 
     public function storeMilestone(Request $request, Project $project)
     {
-        if (! $project->hasUser(Auth::user())) {
-            abort(403, 'You do not have access to this project.');
-        }
+        $this->authorizeProjectAccess($project);
 
         $validated = $request->validate([
             'title'       => ['required', 'string', 'max:255'],
@@ -162,9 +166,7 @@ class ProjectController extends Controller
 
     public function storeTask(Request $request, Project $project)
     {
-        if (! $project->hasUser(Auth::user())) {
-            abort(403, 'You do not have access to this project.');
-        }
+        $this->authorizeProjectAccess($project);
 
         $validated = $request->validate([
             'milestone_id' => ['nullable', 'exists:project_milestones,id'],
@@ -177,7 +179,7 @@ class ProjectController extends Controller
         ]);
 
         if (! empty($validated['milestone_id'])) {
-            $milestone = ProjectMilestone::where('id', $validated['milestone_id'])
+            ProjectMilestone::where('id', $validated['milestone_id'])
                 ->where('project_id', $project->id)
                 ->firstOrFail();
         }
@@ -195,5 +197,33 @@ class ProjectController extends Controller
 
         return redirect()->route('projects.show', $project)
             ->with('success', 'Task added successfully.');
+    }
+
+    public function updateMilestoneStatus(Request $request, ProjectMilestone $milestone)
+    {
+        $milestone->load('project');
+        $this->authorizeProjectAccess($milestone->project);
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:pending,in_progress,completed'],
+        ]);
+
+        $milestone->update(['status' => $validated['status']]);
+
+        return redirect()->back()->with('success', 'Status updated successfully.');
+    }
+
+    public function updateTaskStatus(Request $request, ProjectTask $task)
+    {
+        $task->load('project');
+        $this->authorizeProjectAccess($task->project);
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:todo,in_progress,review,done'],
+        ]);
+
+        $task->update(['status' => $validated['status']]);
+
+        return redirect()->back()->with('success', 'Status updated successfully.');
     }
 }

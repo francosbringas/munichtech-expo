@@ -11,8 +11,8 @@
                 <form method="POST" action="{{ route('collaborations.store') }}">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">Select user</label>
-                        <select name="receiver_id" class="form-select @error('receiver_id') is-invalid @enderror" required>
+                        <label class="form-label" for="receiver_id">Select user <span class="text-danger">*</span></label>
+                        <select name="receiver_id" id="receiver_id" class="form-select @error('receiver_id') is-invalid @enderror" required>
                             <option value="">Choose a collaborator</option>
                             @foreach($users as $receiver)
                                 <option value="{{ $receiver->id }}" @selected(old('receiver_id', $preselectedReceiverId ?? '') == $receiver->id)>
@@ -21,15 +21,28 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('receiver_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        @error('receiver_id')
+                            <div class="text-danger mt-1 small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Message</label>
-                        <textarea name="message" rows="5" class="form-control @error('message') is-invalid @enderror">{{ old('message') }}</textarea>
-                        <small class="text-muted">Describe your proposal and expected outcomes.</small>
-                        @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <label class="form-label" for="message">Message <span class="text-danger">*</span></label>
+                        <textarea
+                            name="message"
+                            id="message"
+                            rows="5"
+                            class="form-control @error('message') is-invalid @enderror"
+                            required
+                            minlength="20"
+                            maxlength="1000"
+                            placeholder="Describe your collaboration proposal, goals, and expected outcomes (minimum 20 characters)."
+                        >{{ old('message') }}</textarea>
+                        <small class="text-muted">Minimum 20 characters, maximum 1000. Be specific about scope, timeline, and value for both parties.</small>
+                        @error('message')
+                            <div class="text-danger mt-1 small">{{ $message }}</div>
+                        @enderror
                     </div>
-                    <button class="btn btn-primary w-100">Send Request</button>
+                    <button type="submit" class="btn btn-primary w-100">Send Request</button>
                 </form>
             </div>
         </div>

@@ -47,9 +47,17 @@ class CollaborationController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'message' => trim((string) $request->input('message', '')),
+        ]);
+
         $validated = $request->validate([
             'receiver_id' => ['required', 'exists:users,id'],
-            'message'     => ['nullable', 'string', 'max:500'],
+            'message'     => ['required', 'string', 'min:20', 'max:1000'],
+        ], [
+            'message.required' => 'Please write a collaboration proposal message.',
+            'message.min'      => 'Your message must be at least 20 characters and describe your proposal clearly.',
+            'message.max'      => 'Your message may not exceed 1000 characters.',
         ]);
 
         if ($validated['receiver_id'] == Auth::id()) {
