@@ -41,11 +41,11 @@ Route::middleware('auth')->group(function () {
     Route::get('collaborations/create', [CollaborationController::class, 'create'])->name('collaborations.create');
     Route::post('collaborations', [CollaborationController::class, 'store'])->name('collaborations.store');
     Route::post('collaborations/{collaboration}/respond', [CollaborationController::class, 'respond'])->name('collaborations.respond');
-
-    Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
-    Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
-    Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
-    Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
-
+    Route::middleware(['auth'])->group(function () {
+        Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+        Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
+        Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+        Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    });
     Route::get('search', [SearchController::class, 'index'])->name('search.index');
 });
