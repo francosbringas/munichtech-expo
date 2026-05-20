@@ -11,21 +11,18 @@
                     @csrf
                     <div class="row g-3">
 
-                        {{--name--}}
                         <div class="col-md-6">
                             <label class="form-label">Full name</label>
                             <input type="text" name="name" value="{{ old('name') }}" class="form-control @error('name') is-invalid @enderror" required>
                             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        {{--email--}}
                         <div class="col-md-6">
                             <label class="form-label">Email</label>
                             <input type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" required>
                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        {{--role--}}
                         <div class="col-md-6">
                             <label class="form-label">Role</label>
                             <select name="role" class="form-select @error('role') is-invalid @enderror" required>
@@ -37,67 +34,22 @@
                             @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        {{--company--}}
                         <div class="col-md-6">
                             <label class="form-label">Enterprise / Startup</label>
                             <input type="text" name="company_name" value="{{ old('company_name') }}" class="form-control @error('company_name') is-invalid @enderror">
                             @error('company_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        {{--phone with country prefix--}}
                         <div class="col-md-6">
                             <label class="form-label">Phone number</label>
                             <div class="input-group">
-                                <select name="phone_prefix" class="form-select" style="max-width: 130px;">
+                                <select name="phone_prefix" class="form-select" style="max-width: 220px;">
                                     @php
-                                    $prefixes = [
-                                        ['code' => '+49',  'flag' => '🇩🇪', 'name' => 'DE'],
-                                        ['code' => '+1',   'flag' => '🇺🇸', 'name' => 'US'],
-                                        ['code' => '+44',  'flag' => '🇬🇧', 'name' => 'GB'],
-                                        ['code' => '+33',  'flag' => '🇫🇷', 'name' => 'FR'],
-                                        ['code' => '+34',  'flag' => '🇪🇸', 'name' => 'ES'],
-                                        ['code' => '+39',  'flag' => '🇮🇹', 'name' => 'IT'],
-                                        ['code' => '+31',  'flag' => '🇳🇱', 'name' => 'NL'],
-                                        ['code' => '+41',  'flag' => '🇨🇭', 'name' => 'CH'],
-                                        ['code' => '+43',  'flag' => '🇦🇹', 'name' => 'AT'],
-                                        ['code' => '+32',  'flag' => '🇧🇪', 'name' => 'BE'],
-                                        ['code' => '+351', 'flag' => '🇵🇹', 'name' => 'PT'],
-                                        ['code' => '+48',  'flag' => '🇵🇱', 'name' => 'PL'],
-                                        ['code' => '+46',  'flag' => '🇸🇪', 'name' => 'SE'],
-                                        ['code' => '+47',  'flag' => '🇳🇴', 'name' => 'NO'],
-                                        ['code' => '+45',  'flag' => '🇩🇰', 'name' => 'DK'],
-                                        ['code' => '+358', 'flag' => '🇫🇮', 'name' => 'FI'],
-                                        ['code' => '+420', 'flag' => '🇨🇿', 'name' => 'CZ'],
-                                        ['code' => '+36',  'flag' => '🇭🇺', 'name' => 'HU'],
-                                        ['code' => '+40',  'flag' => '🇷🇴', 'name' => 'RO'],
-                                        ['code' => '+30',  'flag' => '🇬🇷', 'name' => 'GR'],
-                                        ['code' => '+380', 'flag' => '🇺🇦', 'name' => 'UA'],
-                                        ['code' => '+7',   'flag' => '🇷🇺', 'name' => 'RU'],
-                                        ['code' => '+90',  'flag' => '🇹🇷', 'name' => 'TR'],
-                                        ['code' => '+972', 'flag' => '🇮🇱', 'name' => 'IL'],
-                                        ['code' => '+971', 'flag' => '🇦🇪', 'name' => 'AE'],
-                                        ['code' => '+966', 'flag' => '🇸🇦', 'name' => 'SA'],
-                                        ['code' => '+91',  'flag' => '🇮🇳', 'name' => 'IN'],
-                                        ['code' => '+86',  'flag' => '🇨🇳', 'name' => 'CN'],
-                                        ['code' => '+81',  'flag' => '🇯🇵', 'name' => 'JP'],
-                                        ['code' => '+82',  'flag' => '🇰🇷', 'name' => 'KR'],
-                                        ['code' => '+65',  'flag' => '🇸🇬', 'name' => 'SG'],
-                                        ['code' => '+61',  'flag' => '🇦🇺', 'name' => 'AU'],
-                                        ['code' => '+55',  'flag' => '🇧🇷', 'name' => 'BR'],
-                                        ['code' => '+52',  'flag' => '🇲🇽', 'name' => 'MX'],
-                                        ['code' => '+54',  'flag' => '🇦🇷', 'name' => 'AR'],
-                                        ['code' => '+56',  'flag' => '🇨🇱', 'name' => 'CL'],
-                                        ['code' => '+57',  'flag' => '🇨🇴', 'name' => 'CO'],
-                                        ['code' => '+27',  'flag' => '🇿🇦', 'name' => 'ZA'],
-                                        ['code' => '+20',  'flag' => '🇪🇬', 'name' => 'EG'],
-                                        ['code' => '+212', 'flag' => '🇲🇦', 'name' => 'MA'],
-                                        ['code' => '+234', 'flag' => '🇳🇬', 'name' => 'NG'],
-                                    ];
-                                    $oldPrefix = old('phone_prefix', '+49');
+                                        $oldPrefix = old('phone_prefix', $defaultPhonePrefix);
                                     @endphp
-                                    @foreach($prefixes as $p)
+                                    @foreach($phonePrefixes as $p)
                                         <option value="{{ $p['code'] }}" @selected($oldPrefix === $p['code'])>
-                                            {{ $p['flag'] }} {{ $p['name'] }} {{ $p['code'] }}
+                                            {{ $p['flag'] }} {{ $p['name'] }} ({{ $p['code'] }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -108,7 +60,6 @@
                             </div>
                         </div>
 
-                        {{--interests--}}
                         <div class="col-md-6">
                             <label class="form-label">Interests</label>
                             <input type="text" name="interests" value="{{ old('interests') }}"
@@ -117,20 +68,17 @@
                             @error('interests')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        {{--password--}}
                         <div class="col-md-6">
                             <label class="form-label">Password</label>
                             <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
                             @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        {{--confirm password--}}
                         <div class="col-md-6">
                             <label class="form-label">Confirm Password</label>
                             <input type="password" name="password_confirmation" class="form-control" required>
                         </div>
 
-                        {{--bio--}}
                         <div class="col-12">
                             <label class="form-label">Professional Description</label>
                             <textarea name="bio" rows="3" class="form-control @error('bio') is-invalid @enderror">{{ old('bio') }}</textarea>

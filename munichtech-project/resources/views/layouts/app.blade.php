@@ -24,7 +24,7 @@
     </style>
     @stack('styles')
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
     <div class="container">
         <a class="navbar-brand" href="{{ route('home') }}">
@@ -57,11 +57,11 @@
         </div>
     </div>
 </nav>
-<main class="container py-4 py-lg-5">
+<main class="container py-4 py-lg-5 flex-grow-1">
     @include('partials.alerts')
     @yield('content')
 </main>
-<footer class="bg-dark text-white-50 py-4 mt-5">
+<footer class="bg-dark text-white-50 py-4 mt-auto">
     <div class="container text-center small">
         &copy; {{ date('Y') }} MunichTech EXPO — Innovation, hackathons, and corporate collaboration platform.
     </div>

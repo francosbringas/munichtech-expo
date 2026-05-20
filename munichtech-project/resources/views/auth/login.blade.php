@@ -24,7 +24,7 @@
                         @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3 form-check">
-                        <input type="checkbox" name="remember" class="form-check-input" id="remember">
+                        <input type="checkbox" name="remember" value="1" class="form-check-input" id="remember" @checked(old('remember'))>
                         <label class="form-check-label" for="remember">Remember me</label>
                     </div>
                     <button class="btn btn-primary w-100">Sign in</button>

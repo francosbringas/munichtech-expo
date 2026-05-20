@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CollaborationRequest;
 use App\Models\Project;
 use App\Models\ProjectMember;
+use App\Models\ProjectMilestone;
+use App\Models\ProjectTask;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -123,6 +125,75 @@ class ProjectController extends Controller
 
         $project->load(['owner', 'members', 'milestones.tasks.assignee']);
 
-        return view('projects.show', compact('project'));
+        $canManage = $project->hasUser(Auth::user());
+
+        $assignableUsers = collect([$project->owner])
+            ->merge($project->members)
+            ->unique('id')
+            ->values();
+
+        return view('projects.show', compact('project', 'canManage', 'assignableUsers'));
+    }
+
+    public function storeMilestone(Request $request, Project $project)
+    {
+        if (! $project->hasUser(Auth::user())) {
+            abort(403, 'You do not have access to this project.');
+        }
+
+        $validated = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'target_date' => ['nullable', 'date'],
+            'status'      => ['required', 'in:pending,in_progress,completed'],
+        ]);
+
+        ProjectMilestone::create([
+            'project_id'  => $project->id,
+            'title'       => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'target_date' => $validated['target_date'] ?? null,
+            'status'      => $validated['status'],
+        ]);
+
+        return redirect()->route('projects.show', $project)
+            ->with('success', 'Milestone added successfully.');
+    }
+
+    public function storeTask(Request $request, Project $project)
+    {
+        if (! $project->hasUser(Auth::user())) {
+            abort(403, 'You do not have access to this project.');
+        }
+
+        $validated = $request->validate([
+            'milestone_id' => ['nullable', 'exists:project_milestones,id'],
+            'title'        => ['required', 'string', 'max:255'],
+            'description'  => ['nullable', 'string', 'max:2000'],
+            'assigned_to'  => ['nullable', 'exists:users,id'],
+            'due_date'     => ['nullable', 'date'],
+            'status'       => ['required', 'in:todo,in_progress,review,done'],
+            'priority'     => ['required', 'in:low,medium,high'],
+        ]);
+
+        if (! empty($validated['milestone_id'])) {
+            $milestone = ProjectMilestone::where('id', $validated['milestone_id'])
+                ->where('project_id', $project->id)
+                ->firstOrFail();
+        }
+
+        ProjectTask::create([
+            'project_id'   => $project->id,
+            'milestone_id' => $validated['milestone_id'] ?? null,
+            'title'        => $validated['title'],
+            'description'  => $validated['description'] ?? null,
+            'assigned_to'  => $validated['assigned_to'] ?? null,
+            'due_date'     => $validated['due_date'] ?? null,
+            'status'       => $validated['status'],
+            'priority'     => $validated['priority'],
+        ]);
+
+        return redirect()->route('projects.show', $project)
+            ->with('success', 'Task added successfully.');
     }
 }

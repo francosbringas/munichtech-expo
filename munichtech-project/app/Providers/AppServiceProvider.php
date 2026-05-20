@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (empty(config('services.google.redirect'))) {
+            config([
+                'services.google.redirect' => rtrim((string) config('app.url'), '/') . '/auth/google/callback',
+            ]);
+        }
     }
 }

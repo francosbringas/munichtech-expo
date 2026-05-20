@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\PhoneCountryPrefixes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,8 @@ class AuthController extends Controller
     {
         return view('auth.register', [
             'roles' => User::ROLES,
+            'phonePrefixes' => PhoneCountryPrefixes::all(),
+            'defaultPhonePrefix' => PhoneCountryPrefixes::defaultCode(),
         ]);
     }
 
@@ -33,7 +36,7 @@ class AuthController extends Controller
 
         $phone = null;
         if (! empty($validated['phone_number'])) {
-            $prefix = $validated['phone_prefix'] ?? '+49';
+            $prefix = $validated['phone_prefix'] ?? PhoneCountryPrefixes::defaultCode();
             $phone = trim($prefix . ' ' . $validated['phone_number']);
         }
 
@@ -74,7 +77,9 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             return redirect()->route('dashboard')->with('success', 'Signed in successfully.');
@@ -87,11 +92,25 @@ class AuthController extends Controller
 
     public function redirectToGoogle()
     {
+        $clientId = config('services.google.client_id');
+
+        if (empty($clientId)) {
+            return redirect()->route('login')->withErrors([
+                'error' => 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file.',
+            ]);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
     public function handleGoogleCallback()
     {
+        if (empty(config('services.google.client_id'))) {
+            return redirect()->route('login')->withErrors([
+                'error' => 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file.',
+            ]);
+        }
+
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Exception $e) {
