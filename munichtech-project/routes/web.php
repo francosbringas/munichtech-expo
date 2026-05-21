@@ -52,8 +52,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('milestones/{milestone}/status', [ProjectController::class, 'updateMilestoneStatus'])->name('milestones.updateStatus');
     Route::patch('tasks/{task}/status', [ProjectController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
 
-    Route::patch('milestones/{milestone}/status', [ProjectController::class, 'updateMilestoneStatus'])->name('milestones.updateStatus');
-    Route::patch('tasks/{task}/status', [ProjectController::class, 'updateTaskStatus'])->name('tasks.updateStatus');
 
     Route::get('search', [SearchController::class, 'index'])->name('search.index');
 

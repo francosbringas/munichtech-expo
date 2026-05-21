@@ -226,4 +226,23 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', 'Status updated successfully.');
     }
+
+    private function authorizeProjectAccess(Project $project)
+    {
+        $user = Auth::user();
+
+        if ($user->is_admin) {
+            return;
+        }
+
+        if ($project->owner_id === $user->id) {
+            return;
+        }
+
+        $isMember = $project->members()->where('user_id', $user->id)->exists();
+
+        if (!$isMember) {
+            abort(403, 'You do not have access to this project.');
+        }
+    }
 }
