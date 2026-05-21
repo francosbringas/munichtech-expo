@@ -5,41 +5,111 @@
 @push('styles')
 <style>
     .landing-hero {
-        background: linear-gradient(135deg, #0b1220 0%, #1a2744 50%, #0d3b66 100%);
-        color: #fff;
-        border-radius: 1.25rem;
+        background: var(--bg-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        color: var(--text-primary);
         padding: 4rem 2rem;
-        position: relative;
-        overflow: hidden;
     }
-    .landing-hero::before {
-        content: '';
-        position: absolute;
-        top: -50%; right: -20%;
-        width: 60%; height: 200%;
-        background: radial-gradient(ellipse, rgba(0,212,170,0.15) 0%, transparent 70%);
+
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.03em;
     }
-    .section-title { font-weight: 700; letter-spacing: -0.03em; }
+
+    .section-surface {
+        background: var(--bg-raised);
+        border-radius: var(--radius-lg);
+    }
+
     .feature-card {
-        border: none;
-        border-radius: 1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
         height: 100%;
     }
+
     .feature-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        border-color: var(--border-default);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     }
+
     .icon-box {
-        width: 56px; height: 56px;
-        border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 1.5rem;
     }
-    .bg-ai { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
-    .bg-startup { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
-    .bg-hack { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #fff; }
-    .bg-collab { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #fff; }
+
+    .bg-ai {
+        background: var(--accent-subtle);
+        color: var(--accent);
+        border: 1px solid var(--accent-border);
+    }
+
+    .bg-startup {
+        background: var(--info-subtle);
+        color: var(--info);
+        border: 1px solid var(--info-border);
+    }
+
+    .bg-hack {
+        background: var(--success-subtle);
+        color: var(--success);
+        border: 1px solid var(--success-border);
+    }
+
+    .bg-collab {
+        background: var(--warning-subtle);
+        color: var(--warning);
+        border: 1px solid var(--warning-border);
+    }
+
+    .landing-hero .opacity-90,
+    .landing-hero .opacity-75,
+    .landing-hero .opacity-25 {
+        opacity: 1;
+        color: var(--text-secondary);
+    }
+
+    .landing-hero .display-1 {
+        color: var(--text-disabled);
+    }
+
+    .landing-hero .lead {
+        color: var(--text-secondary);
+    }
+
+    .icon-box.bg-primary,
+    .icon-box.bg-success,
+    .icon-box.bg-warning,
+    .icon-box.bg-secondary {
+        background: var(--accent-subtle);
+        color: var(--accent);
+        border: 1px solid var(--accent-border);
+    }
+
+    .icon-box.bg-success {
+        background: var(--success-subtle);
+        color: var(--success);
+        border: 1px solid var(--success-border);
+    }
+
+    .icon-box.bg-warning {
+        background: var(--warning-subtle);
+        color: var(--warning);
+        border: 1px solid var(--warning-border);
+    }
+
+    .icon-box.bg-secondary {
+        background: var(--bg-raised);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-default);
+    }
 </style>
 @endpush
 
@@ -50,7 +120,7 @@
         <div class="col-lg-7">
             <span class="badge bg-success mb-3">Munich · 2026</span>
             <h1 class="display-4 fw-bold mb-3">MunichTech EXPO</h1>
-            <p class="lead opacity-90 mb-4">
+            <p class="lead mb-4">
                 Europe's hub where startups, investors, and corporations converge to shape the future of AI, innovation, and enterprise collaboration.
             </p>
             <div class="d-flex flex-wrap gap-3">
@@ -58,22 +128,22 @@
                     <a href="{{ route('register') }}" class="btn btn-success btn-lg px-4">
                         <i class="bi bi-ticket-perforated me-2"></i>Get Ticket
                     </a>
-                    <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg px-4">
+                    <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg px-4">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Access Dashboard
                     </a>
                 @else
                     <a href="{{ route('dashboard') }}" class="btn btn-success btn-lg px-4">
                         <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
                     </a>
-                    <a href="{{ route('events.create') }}" class="btn btn-outline-light btn-lg px-4">
+                    <a href="{{ route('events.create') }}" class="btn btn-outline-secondary btn-lg px-4">
                         <i class="bi bi-calendar-event me-2"></i>Register for Event
                     </a>
                 @endguest
             </div>
         </div>
         <div class="col-lg-5 mt-4 mt-lg-0 text-center">
-            <div class="display-1 opacity-25"><i class="bi bi-globe-europe-africa"></i></div>
-            <p class="small opacity-75 mb-0">500+ attendees · 40 startups · 12 investors</p>
+            <div class="display-1"><i class="bi bi-globe-europe-africa"></i></div>
+            <p class="small mb-0">500+ attendees · 40 startups · 12 investors</p>
         </div>
     </div>
 </section>
@@ -85,7 +155,7 @@
     </div>
     <div class="row g-4">
         <div class="col-md-4">
-            <div class="card feature-card shadow-sm">
+            <div class="card feature-card">
                 <div class="card-body p-4">
                     <div class="icon-box bg-ai mb-3"><i class="bi bi-cpu"></i></div>
                     <h5>Artificial Intelligence</h5>
@@ -94,7 +164,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card feature-card shadow-sm">
+            <div class="card feature-card">
                 <div class="card-body p-4">
                     <div class="icon-box bg-primary bg-opacity-10 text-primary mb-3"><i class="bi bi-shield-lock"></i></div>
                     <h5>Cybersecurity</h5>
@@ -103,7 +173,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card feature-card shadow-sm">
+            <div class="card feature-card">
                 <div class="card-body p-4">
                     <div class="icon-box bg-info bg-opacity-10 text-info mb-3"><i class="bi bi-cloud"></i></div>
                     <h5>Cloud &amp; IoT</h5>
@@ -114,14 +184,14 @@
     </div>
 </section>
 
-<section class="py-5 bg-body-secondary rounded-4 px-3" id="startup-ecosystem">
+<section class="py-5 section-surface px-3" id="startup-ecosystem">
     <div class="text-center mb-5">
         <h2 class="section-title display-6">Startup Ecosystem</h2>
         <p class="text-muted col-lg-8 mx-auto">Exclusive opportunities for founders, VCs, and corporations seeking high-impact synergies.</p>
     </div>
     <div class="row g-4">
         <div class="col-lg-4">
-            <div class="card feature-card border-0 shadow">
+            <div class="card feature-card">
                 <div class="card-body text-center p-4">
                     <div class="icon-box bg-startup mx-auto mb-3"><i class="bi bi-rocket-takeoff"></i></div>
                     <h5>Startups</h5>
@@ -130,18 +200,18 @@
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card feature-card border-0 shadow">
+            <div class="card feature-card">
                 <div class="card-body text-center p-4">
-                    <div class="icon-box bg-warning text-dark mx-auto mb-3"><i class="bi bi-cash-stack"></i></div>
+                    <div class="icon-box bg-warning mx-auto mb-3"><i class="bi bi-cash-stack"></i></div>
                     <h5>Investors</h5>
                     <p class="text-muted small">Curated deal flow, private meetings, and networking with committee pre-validated founders.</p>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card feature-card border-0 shadow">
+            <div class="card feature-card">
                 <div class="card-body text-center p-4">
-                    <div class="icon-box bg-secondary text-white mx-auto mb-3"><i class="bi bi-building"></i></div>
+                    <div class="icon-box bg-secondary mx-auto mb-3"><i class="bi bi-building"></i></div>
                     <h5>Corporations</h5>
                     <p class="text-muted small">Open innovation, corporate pilots, and strategic partnerships with service providers.</p>
                 </div>
@@ -162,11 +232,11 @@
             </ul>
         </div>
         <div class="col-lg-6">
-            <div class="card border-0 shadow-lg">
-                <div class="card-body p-4 bg-dark text-white rounded">
+            <div class="card">
+                <div class="card-body p-4">
                     <div class="icon-box bg-hack d-inline-flex mb-3"><i class="bi bi-code-slash"></i></div>
                     <h4>Dev Sprint 2026</h4>
-                    <p class="opacity-75 small mb-3">From concept to MVP in one weekend. Winning projects are automatically published on the collaboration dashboard.</p>
+                    <p class="text-muted small mb-3">From concept to MVP in one weekend. Winning projects are automatically published on the collaboration dashboard.</p>
                     <span class="badge bg-success">Registrations open</span>
                 </div>
             </div>
@@ -186,17 +256,17 @@
             <p class="small text-muted">Send collaboration requests to compatible profiles.</p>
         </div>
         <div class="col-md-3 text-center">
-            <div class="icon-box bg-primary text-white mx-auto mb-2"><i class="bi bi-handshake"></i></div>
+            <div class="icon-box bg-primary mx-auto mb-2"><i class="bi bi-handshake"></i></div>
             <h6>2. Accept</h6>
             <p class="small text-muted">Approve partnerships and define team roles.</p>
         </div>
         <div class="col-md-3 text-center">
-            <div class="icon-box bg-success text-white mx-auto mb-2"><i class="bi bi-kanban"></i></div>
+            <div class="icon-box bg-success mx-auto mb-2"><i class="bi bi-kanban"></i></div>
             <h6>3. Build</h6>
             <p class="small text-muted">Create projects with milestones, tasks, and progress tracking.</p>
         </div>
         <div class="col-md-3 text-center">
-            <div class="icon-box bg-warning text-dark mx-auto mb-2"><i class="bi bi-stars"></i></div>
+            <div class="icon-box bg-warning mx-auto mb-2"><i class="bi bi-stars"></i></div>
             <h6>4. AI Match</h6>
             <p class="small text-muted">Receive intelligent suggestions for relevant connections.</p>
         </div>

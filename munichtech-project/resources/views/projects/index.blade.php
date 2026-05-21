@@ -56,10 +56,10 @@
         </div>
         @if($matchmakingSuggestions->count() > 3)
             <button class="carousel-control-prev" type="button" data-bs-target="#matchmakingCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon bg-dark rounded"></span>
+                <span class="carousel-control-prev-icon rounded"></span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#matchmakingCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon bg-dark rounded"></span>
+                <span class="carousel-control-next-icon rounded"></span>
             </button>
         @endif
     </div>
