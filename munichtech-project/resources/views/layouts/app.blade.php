@@ -153,13 +153,6 @@
             filter: invert(1) opacity(0.7);
         }
 
-        /* Footer */
-        .site-footer {
-            background: var(--bg-base);
-            border-top: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-        }
-
         /* Cards */
         .card {
             background: var(--bg-base);
@@ -743,6 +736,111 @@
         .display-6.text-warning {
             color: var(--warning) !important;
         }
+
+        /* Corporate footer */
+        .site-footer {
+            background: var(--bg-base);
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding-top: 64px;
+            padding-bottom: 32px;
+        }
+
+        .footer-brand {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.12em;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .footer-desc {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            max-width: 280px;
+        }
+
+        .footer-heading {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-location {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .footer-location strong {
+            display: block;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 48px;
+            padding-top: 28px;
+        }
+
+        .footer-social {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 16px;
+            transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .footer-social a:hover {
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+            background: var(--bg-raised);
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            color: var(--text-disabled);
+            margin: 0;
+        }
     </style>
     @stack('styles')
 </head>
@@ -783,9 +881,49 @@
     @include('partials.alerts')
     @yield('content')
 </main>
-<footer class="site-footer py-4 mt-auto">
-    <div class="container text-center small">
-        &copy; {{ date('Y') }} MunichTech EXPO — Innovation, hackathons, and corporate collaboration platform.
+<footer class="site-footer mt-auto">
+    <div class="container">
+        <div class="row g-4 g-lg-5">
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-brand">MUNICH TECH EXPO</div>
+                <p class="footer-desc mb-0">
+                    Europe's premier deep-tech gathering in Munich — where enterprise R&amp;D, venture capital, and frontier innovation converge at Messe München.
+                </p>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <div class="footer-heading">Legal</div>
+                <ul class="footer-links">
+                    <li><a href="#">General Terms of Business</a></li>
+                    <li><a href="#">Delegate Terms of Business</a></li>
+                    <li><a href="#">Website Terms of Use</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cookies Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <div class="footer-heading">Company</div>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Press Kit</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-heading">Location</div>
+                <p class="footer-location mb-0">
+                    <strong>Sede Central</strong>
+                    Munich, Germany — Messe München Exhibition Center
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+            <div class="footer-social">
+                <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+                <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+            </div>
+            <p class="footer-copyright mb-0">&copy; Copyright MunichTech Expo. All rights reserved.</p>
+        </div>
     </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

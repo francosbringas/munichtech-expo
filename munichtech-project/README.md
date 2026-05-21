@@ -1,38 +1,80 @@
-# MunichTech EXPO
+# MunichTech EXPO 2026 — Premium Venture Capital & Startup Platform
 
-A professional event management, hackathon, and corporate–startup collaboration platform built with **Laravel 11**, **Blade**, **Bootstrap 5**, and **SQLite**. MunichTech EXPO connects innovators, investors, and enterprises through structured collaboration workflows, project delivery tooling, and an admin moderation layer.
+**The elite digital nerve center for Munich’s deep-tech economy.**
+
+MunichTech EXPO 2026 is a **bespoke venture capital and deep-tech incubation management hub**—engineered for high-profile funds, growth-stage startups, and corporate innovation leaders operating across Bavaria’s premier technology corridor. Built on **Laravel 11**, **Blade**, **Bootstrap 5**, and **SQLite**, the platform unifies delegate onboarding, structured collaboration workflows, interactive project delivery, and executive-grade moderation into a single, meticulously crafted operational environment.
+
+When investors, incubator directors, or strategic partners open this repository, they encounter not a prototype—but a **production-ready digital ecosystem** aligned with the same warm-neutral, premium interface language trusted by tier-one SaaS products (Stripe Dashboard, Vercel, Money20/20).
 
 ---
 
-## Key Features
+## Executive Overview
+
+| Dimension | Capability |
+|-----------|------------|
+| **Identity & Access** | Enterprise Google OAuth 2.0 + hardened email/password authentication |
+| **Deal Flow & Collaboration** | Validated partnership requests with role-aware project spin-up |
+| **Delivery Workspace** | Milestone hierarchies, task assignment, and real-time status routing |
+| **Capital Intelligence** | Rule-based matchmaking engine for investor–startup alignment |
+| **Governance** | Admin moderation layer with full audit trail and registration oversight |
+
+---
+
+## 💎 Visual Design System
+
+The application interface has been architected as a **dark, warm-neutral corporate experience**—calm, expensive, and deliberately restrained. No neon accents, no crypto-style glow, and no glassmorphism; surfaces are **solid, layered, and precision-crafted**.
+
+### Design tokens & typography
+
+| Layer | Specification |
+|-------|----------------|
+| **Surfaces** | `--bg-void`, `--bg-base`, `--bg-raised`, `--bg-overlay` — warm charcoal palette (not cold blue-black) |
+| **Borders** | Subtle rgba whites (`--border-subtle` → `--border-strong`) for depth without visual noise |
+| **Accent** | Desaturated warm coral (`--accent: #c8614a`) — MunichTech signature hue |
+| **Semantics** | `--success`, `--warning`, `--danger`, `--info` for status, badges, and alerts |
+| **Typography** | **Syne** (800) for commanding headings · **Inter** (300–600) for interface copy at 14px base |
+
+### Immersive interface modules
+
+- **Corporate landing experience** — Executive hero, innovation track cards, hackathon module, and collaboration workflow narrative on `welcome.blade.php`.
+- **Live Sponsor Marquee** — Infinite horizontal scroll loop beneath the hero, showcasing monochromatic wordmarks for Munich tech leaders (**BMW**, **Siemens**, **Allianz**, **SAP**, **Infineon**, **Google Munich**) under *“Trusted by Tech Leaders & Global Investors.”*
+- **About & Partner sections** — Dual-column 2026 program briefing (AI, Deep Tech, Venture Capital tracks) and a premium *Partner with MunichTech Expo 2026* sponsorship CTA block.
+- **Structured corporate footer** — Four-column layout (brand, legal, company, Messe München location) with monochromatic social icons (LinkedIn, X, YouTube) and rights line.
+- **Advanced status interaction controls** — Context-aware `<select>` and badge styling on project workspaces for instant milestone/task state transitions without leaving the detail view.
+
+All styling is centralized in `resources/views/layouts/app.blade.php` with token-driven overrides—ensuring **visual parity across every authenticated and public view**.
+
+---
+
+## ⚙️ Core Product Engine
 
 ### Google OAuth 2.0 Authentication
 
-Fast, secure sign-in with Google via **Laravel Socialite**. Users can register or log in with one click while traditional email/password authentication remains available. Credentials are managed through environment variables and validated before redirecting to Google.
+Frictionless, enterprise-grade sign-in with Google via **Laravel Socialite**. Delegates register or authenticate in one gesture while traditional email/password flows remain fully supported. Credentials are environment-governed and validated prior to any OAuth redirect.
 
 ### Interactive Project Management
 
-Dynamic project workspaces with **Bootstrap 5 modals** for creating milestones and tasks without leaving the project view. Team members can add milestones with target dates, assign tasks to collaborators, and organize work under a clear milestone hierarchy or as standalone tasks.
+Dynamic project workspaces powered by **Bootstrap 5 modals**—create milestones and tasks without navigation churn. Team leads define target dates, assign collaborators, and organize delivery under milestone hierarchies or standalone workstreams.
 
 ### Real-time Task Status Updates
 
-Interactive status controls on the project detail page let authorized users update progress instantly:
+Authorised operators update delivery state directly from the project command center:
 
 | Entity | Allowed statuses |
 |--------|------------------|
 | **Milestones** | `pending`, `in_progress`, `completed` |
 | **Tasks** | `todo`, `in_progress`, `review`, `done` |
 
-Status changes are submitted via `PATCH` routes and reflected immediately after redirect, with optional one-click **Mark as done** actions for tasks.
+Status mutations route through dedicated `PATCH` endpoints and reconcile immediately post-redirect, with optional one-click **Mark as done** accelerators for task completion.
 
-### Internationalization & UI Polish
+### Internationalization & Interface Refinement
 
 - **Phone prefix selector** on registration: countries sorted alphabetically by English name, with Unicode flag emojis (e.g. `🇩🇪 Germany (+49)`).
-- **Sticky footer layout** using the Bootstrap 5 flexbox pattern (`min-vh-100`, `flex-grow-1`, `mt-auto`) so the footer stays anchored on short pages.
+- **Sticky footer layout** using the Bootstrap 5 flexbox pattern (`min-vh-100`, `flex-grow-1`, `mt-auto`) so the corporate footer remains anchored on short pages.
 - **Remember me** support with Laravel’s persistent authentication cookie.
 - **English-first UI** across views, flash messages, and documentation for international stakeholders.
 
-### Additional Capabilities
+### Extended Platform Capabilities
 
 - Collaboration requests with validated proposal messages (minimum 20 characters).
 - AI-style matchmaking suggestions on the dashboard (rule-based, role + interests).
@@ -41,7 +83,75 @@ Status changes are submitted via `PATCH` routes and reflected immediately after 
 
 ---
 
-## Installation and Setup Guide
+## 🛠️ System Architecture & Data Schema
+
+### Database structure (2026 schema)
+
+| Table | Key description |
+|-------|-----------------|
+| `users` | Profiles with role, interests, `google_id`, `is_admin`, `is_active` |
+| `event_registrations` | Tickets: `free`, `startup`, `investor`, `company`, `hackathon` + `status` |
+| `collaboration_requests` | Requests between users (`pending`, `accepted`, `rejected`, `cancelled`) |
+| `projects` | Projects with workflow `status` and moderation `admin_status` |
+| `project_members` | Pivot with roles: `owner`, `lead`, `contributor`, `viewer` |
+| `project_milestones` | Milestones with `target_date` and `status` enum |
+| `project_tasks` | Tasks with `assigned_to`, `status`, `priority` |
+| `audit_logs` | Administrative action logging |
+| `notifications` | In-app notification system |
+
+### Models and key interactions
+
+```
+User ──hasMany──> EventRegistration, CollaborationRequest, Project
+User ──belongsToMany──> Project (via project_members + role pivot)
+Project ──hasMany──> ProjectMilestone, ProjectTask
+ProjectMilestone ──hasMany──> ProjectTask
+CollaborationRequest ──belongsTo──> User (sender/receiver)
+```
+
+### Collaboration flow
+
+1. User A sends a request → `collaboration_requests.status = pending`
+2. User B accepts → `status = accepted`
+3. Either party sees the **Create Project** button → redirects to `/projects/create?collaboration_id=X`
+4. On save, the project is created and members are assigned automatically
+
+### Project status update routes
+
+| Method | Route | Purpose |
+|--------|-------|---------|
+| `PATCH` | `/milestones/{milestone}/status` | Update milestone status |
+| `PATCH` | `/tasks/{task}/status` | Update task status |
+| `POST` | `/projects/{project}/milestones` | Create milestone |
+| `POST` | `/projects/{project}/tasks` | Create task |
+
+### Technology stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | Laravel 11 (PHP 8.2+) |
+| Database | SQLite (dev) / PostgreSQL recommended (production) |
+| Frontend | Blade Templates + Bootstrap 5.3 |
+| OAuth authentication | Laravel Socialite (Google) |
+| ORM | Eloquent |
+| Assets | Vite (optional) |
+
+### Main route structure
+
+| Route | Description |
+|-------|-------------|
+| `/` | Corporate landing page |
+| `/register`, `/login` | Authentication + Google OAuth |
+| `/auth/google`, `/auth/google/callback` | OAuth redirect and callback |
+| `/dashboard` | User dashboard with matchmaking suggestions |
+| `/collaborations` | Collaboration request management |
+| `/projects`, `/projects/{project}` | Project list and detail (milestones/tasks) |
+| `/events` | Event registrations |
+| `/admin` | CRUD dashboard (administrators only) |
+
+---
+
+## 🚀 Deployment & Operation Workflow
 
 ### Prerequisites
 
@@ -167,63 +277,6 @@ php artisan db:seed --force   # optional: demo data for staging demos
 
 ---
 
-## System Architecture
-
-### Database structure (2026 schema)
-
-| Table | Key description |
-|-------|-----------------|
-| `users` | Profiles with role, interests, `google_id`, `is_admin`, `is_active` |
-| `event_registrations` | Tickets: `free`, `startup`, `investor`, `company`, `hackathon` + `status` |
-| `collaboration_requests` | Requests between users (`pending`, `accepted`, `rejected`, `cancelled`) |
-| `projects` | Projects with workflow `status` and moderation `admin_status` |
-| `project_members` | Pivot with roles: `owner`, `lead`, `contributor`, `viewer` |
-| `project_milestones` | Milestones with `target_date` and `status` enum |
-| `project_tasks` | Tasks with `assigned_to`, `status`, `priority` |
-| `audit_logs` | Administrative action logging |
-| `notifications` | In-app notification system |
-
-### Models and key interactions
-
-```
-User ──hasMany──> EventRegistration, CollaborationRequest, Project
-User ──belongsToMany──> Project (via project_members + role pivot)
-Project ──hasMany──> ProjectMilestone, ProjectTask
-ProjectMilestone ──hasMany──> ProjectTask
-CollaborationRequest ──belongsTo──> User (sender/receiver)
-```
-
-### Collaboration flow
-
-1. User A sends a request → `collaboration_requests.status = pending`
-2. User B accepts → `status = accepted`
-3. Either party sees the **Create Project** button → redirects to `/projects/create?collaboration_id=X`
-4. On save, the project is created and members are assigned automatically
-
-### Project status update routes
-
-| Method | Route | Purpose |
-|--------|-------|---------|
-| `PATCH` | `/milestones/{milestone}/status` | Update milestone status |
-| `PATCH` | `/tasks/{task}/status` | Update task status |
-| `POST` | `/projects/{project}/milestones` | Create milestone |
-| `POST` | `/projects/{project}/tasks` | Create task |
-
----
-
-## Technology Stack
-
-| Layer | Technology |
-|-------|------------|
-| Backend | Laravel 11 (PHP 8.2+) |
-| Database | SQLite (dev) / PostgreSQL recommended (production) |
-| Frontend | Blade Templates + Bootstrap 5.3 |
-| OAuth authentication | Laravel Socialite (Google) |
-| ORM | Eloquent |
-| Assets | Vite (optional) |
-
----
-
 ## Security Protocols and Measures
 
 | Measure | Implementation |
@@ -239,7 +292,7 @@ CollaborationRequest ──belongsTo──> User (sender/receiver)
 
 ---
 
-## Development Assumptions and Design Decisions
+## Engineering Principles & Design Decisions
 
 1. **Unified migrations**: Duplicate migrations `0001_01_01_000003–000009` were removed; schema `2026_05_20_*` is the source of truth.
 2. **Dual project status**: `status` (team workflow) and `admin_status` (moderation: active/inactive/suspended) are separate concepts.
@@ -264,21 +317,6 @@ CollaborationRequest ──belongsTo──> User (sender/receiver)
 
 ---
 
-## Main Route Structure
-
-| Route | Description |
-|-------|-------------|
-| `/` | Corporate landing page |
-| `/register`, `/login` | Authentication + Google OAuth |
-| `/auth/google`, `/auth/google/callback` | OAuth redirect and callback |
-| `/dashboard` | User dashboard with matchmaking suggestions |
-| `/collaborations` | Collaboration request management |
-| `/projects`, `/projects/{project}` | Project list and detail (milestones/tasks) |
-| `/events` | Event registrations |
-| `/admin` | CRUD dashboard (administrators only) |
-
----
-
 ## AI Tools Used in Development
 
 This deliverable was accelerated with AI assistance in the following areas:
@@ -295,4 +333,4 @@ This deliverable was accelerated with AI assistance in the following areas:
 
 ## License
 
-MIT — Academic project / MunichTech EXPO 2026 demonstration.
+MIT — MunichTech EXPO 2026 demonstration platform.
